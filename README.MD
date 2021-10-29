@@ -1,2 +1,2 @@
-**Encrypt**
-A simple gui for encrypting and decrypting strings
+# Encrypt
+A simple **GTK** gui for encrypting and decrypting strings.
