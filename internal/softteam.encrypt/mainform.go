@@ -13,7 +13,7 @@ import (
 )
 
 const applicationTitle = "SoftTeam EncryptDecrypt"
-const applicationVersion = "v 1.0.1"
+const applicationVersion = "v 1.0.2"
 const applicationCopyRight = "©SoftTeam AB, 2020"
 
 type MainForm struct {
