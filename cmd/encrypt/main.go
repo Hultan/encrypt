@@ -1,4 +1,5 @@
 package main
+
 import (
 	"os"
 
@@ -20,7 +21,7 @@ func main() {
 		panic("Failed to create GTK Application : " + err.Error())
 	}
 
-	mainForm := softteam_encrypt.NewMainForm()
+	mainForm := encrypt.NewMainForm()
 	// Hook up the activate event handler
 	application.Connect("activate", mainForm.OpenMainForm)
 	if err != nil {

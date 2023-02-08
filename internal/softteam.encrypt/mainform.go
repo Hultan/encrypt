@@ -1,4 +1,4 @@
-package softteam_encrypt
+package encrypt
 
 import (
 	_ "embed"
@@ -20,13 +20,16 @@ var encryptIcon []byte
 //go:embed assets/lock_open.png
 var decryptIcon []byte
 
+//go:embed assets/main.glade
+var mainGlade string
+
 const applicationTitle = "SoftTeam EncryptDecrypt"
-const applicationVersion = "v 1.0.3"
+const applicationVersion = "v 1.0.4"
 const applicationCopyRight = "©SoftTeam AB, 2020"
 
 type MainForm struct {
 	Window  *gtk.ApplicationWindow
-	builder *framework.GtkBuilder
+	builder *GtkBuilder
 }
 
 var encryptTextview, decryptTextview *gtk.TextView
@@ -42,9 +45,12 @@ func (m *MainForm) OpenMainForm(app *gtk.Application) {
 	// Initialize gtk
 	gtk.Init(&os.Args)
 
-	// Create a new softBuilder
-	fw := framework.NewFramework()
-	builder, err := fw.Gtk.CreateBuilder("main.glade")
+	b, err := gtk.BuilderNewFromString(mainGlade)
+	if err != nil {
+		panic(err)
+	}
+
+	builder := &GtkBuilder{Builder: b}
 	if err != nil {
 		panic(err)
 	}
@@ -55,14 +61,10 @@ func (m *MainForm) OpenMainForm(app *gtk.Application) {
 
 	// Set up main window
 	m.Window.SetApplication(app)
-	m.Window.SetTitle("SoftTeam EncryptDecrypt")
+	m.Window.SetTitle("SoftTeam Crypto")
 
 	// Hook up the destroy event
 	m.Window.Connect("destroy", m.Window.Close)
-
-	// Quit button
-	button := m.builder.GetObject("main_window_quit_button").(*gtk.ToolButton)
-	button.Connect("clicked", m.Window.Close)
 
 	// Status bar
 	statusBar := m.builder.GetObject("main_window_status_bar").(*gtk.Statusbar)
@@ -83,8 +85,7 @@ func (m *MainForm) OpenMainForm(app *gtk.Application) {
 	encryptTextview = m.builder.GetObject("encrypt_textview").(*gtk.TextView)
 	decryptTextview = m.builder.GetObject("decrypt_textview").(*gtk.TextView)
 
-	// Menu
-	m.setupMenu()
+	encryptTextview.GrabFocus()
 
 	// Show the main window
 	m.Window.ShowAll()
@@ -100,11 +101,6 @@ func (m *MainForm) SetButtonIcon(button *gtk.Button, bytes []byte) {
 		panic(err)
 	}
 	button.SetImage(img)
-}
-
-func (m *MainForm) setupMenu() {
-	menuQuit := m.builder.GetObject("menu_file_quit").(*gtk.MenuItem)
-	menuQuit.Connect("activate", m.Window.Close)
 }
 
 func (m *MainForm) encryptButtonClicked() {
