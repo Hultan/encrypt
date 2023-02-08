@@ -1,10 +1,12 @@
 package softteam_encrypt
 
 import (
+	_ "embed"
 	"fmt"
 	"log"
 	"os"
 
+	"github.com/gotk3/gotk3/gdk"
 	"golang.design/x/clipboard"
 
 	"github.com/hultan/softteam/framework"
@@ -12,13 +14,19 @@ import (
 	"github.com/gotk3/gotk3/gtk"
 )
 
+//go:embed assets/lock.png
+var encryptIcon []byte
+
+//go:embed assets/lock_open.png
+var decryptIcon []byte
+
 const applicationTitle = "SoftTeam EncryptDecrypt"
-const applicationVersion = "v 1.0.2"
+const applicationVersion = "v 1.0.3"
 const applicationCopyRight = "©SoftTeam AB, 2020"
 
 type MainForm struct {
-	Window      *gtk.ApplicationWindow
-	builder     *framework.GtkBuilder
+	Window  *gtk.ApplicationWindow
+	builder *framework.GtkBuilder
 }
 
 var encryptTextview, decryptTextview *gtk.TextView
@@ -62,12 +70,14 @@ func (m *MainForm) OpenMainForm(app *gtk.Application) {
 	statusBar.Push(statusBar.GetContextId("SoftTeam"), message)
 
 	// Encrypt button
-	encryptButton := m.builder.GetObject("encrypt_button").(*gtk.Button)
-	encryptButton.Connect("clicked", m.encryptButtonClicked)
+	encryptBtn := m.builder.GetObject("encrypt_button").(*gtk.Button)
+	encryptBtn.Connect("clicked", m.encryptButtonClicked)
+	m.SetButtonIcon(encryptBtn, encryptIcon)
 
 	// Decrypt button
-	decryptButton := m.builder.GetObject("decrypt_button").(*gtk.Button)
-	decryptButton.Connect("clicked", m.decryptButtonClicked)
+	decryptBtn := m.builder.GetObject("decrypt_button").(*gtk.Button)
+	decryptBtn.Connect("clicked", m.decryptButtonClicked)
+	m.SetButtonIcon(decryptBtn, decryptIcon)
 
 	// Encrypt textview
 	encryptTextview = m.builder.GetObject("encrypt_textview").(*gtk.TextView)
@@ -78,6 +88,18 @@ func (m *MainForm) OpenMainForm(app *gtk.Application) {
 
 	// Show the main window
 	m.Window.ShowAll()
+}
+
+func (m *MainForm) SetButtonIcon(button *gtk.Button, bytes []byte) {
+	pix, err := gdk.PixbufNewFromBytesOnly(bytes)
+	if err != nil {
+		panic(err)
+	}
+	img, err := gtk.ImageNewFromPixbuf(pix)
+	if err != nil {
+		panic(err)
+	}
+	button.SetImage(img)
 }
 
 func (m *MainForm) setupMenu() {
@@ -114,7 +136,7 @@ func (m *MainForm) getText(textview *gtk.TextView) string {
 	}
 	start := textBuffer.GetStartIter()
 	end := textBuffer.GetEndIter()
-	text, err := textBuffer.GetText(start, end,true)
+	text, err := textBuffer.GetText(start, end, true)
 	if err != nil {
 		log.Fatalln(err)
 	}
